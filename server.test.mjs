@@ -5,11 +5,11 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createApp} from './server.mjs';
 test('Authentication, origin validation, read-only refresh, management allowlist and push SSRF rejection',async t=>{
- const dataDir=await mkdtemp(join(tmpdir(),'ocx-mobile-test-'));const commands=[];
+ const dataDir=await mkdtemp(join(tmpdir(),'ocx-mobile-test-'));const commands=[];const resetCalls=[];
  const execute=async(cmd,args)=>{commands.push(args);if(args.includes('strategy'))return {stdout:JSON.stringify({strategy:'round-robin'})};return {stdout:JSON.stringify({accounts:[{id:'__main__',label:'team',email:'private@example.com',quota:{shortPercent:10,weeklyPercent:20,shortWindowSeconds:18000},quotaRefresh:{status:'ok'}}]})};};
  await writeFile(join(dataDir,'config.json'),JSON.stringify({codexAccounts:[]}));
  await writeFile(join(dataDir,'codex-quota-cache.json'),JSON.stringify({version:1,quotas:{__main__:{shortPercent:10}}}));
- const {app,codePath}=await createApp({dataDir,execute,quotaDir:dataDir,refreshAccounts:async()=>JSON.parse((await execute('opencodex',['account','refresh','openai','--json'])).stdout)});const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>server.close());
+ const {app,codePath}=await createApp({dataDir,execute,quotaDir:dataDir,resetRequest:async(path,method,body)=>{resetCalls.push({path,method,body});return method==='GET'?{available_count:2,credits:[]}:{code:'reset',remaining:1};},refreshAccounts:async()=>JSON.parse((await execute('opencodex',['account','refresh','openai','--json'])).stdout)});const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>server.close());
  const base=`http://127.0.0.1:${server.address().port}`;let cookie;
  const request=(path,body,origin=base)=>fetch(base+'/api/'+path,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',...(origin?{Origin:origin}:{}),...(cookie?{Cookie:cookie}:{})},body:body===undefined?undefined:JSON.stringify(body)});
  assert.equal((await request('state')).status,401);assert.equal(commands.length,0);
@@ -29,6 +29,15 @@ test('Authentication, origin validation, read-only refresh, management allowlist
  assert.equal((await request('push/subscribe',{subscription:{endpoint:'https://127.0.0.1/private',keys:{p256dh:'a',auth:'b'}}})).status,400);
  assert.equal((await request('action',{action:'pause',id:'__main__'})).status,200);assert.ok(commands.some(a=>a[1]==='pause'));
  assert.equal(commands.some(a=>a.includes('reset-credits')||a.includes('login')),false);
+ assert.equal((await request('reset-credits?id=bad')).status,400);assert.equal(resetCalls.length,0);
+ const inspection=await(await request('reset-credits?id=__main__')).json();assert.equal(inspection.availableCount,2);
+ assert.equal((await request('reset-credits/consume',{id:'__main__',operationId:'bad',confirmed:true})).status,400);
+ const operationId='11111111-1111-4111-8111-111111111111';
+ assert.equal((await request('reset-credits/consume',{id:'__main__',operationId,confirmed:false})).status,400);
+ assert.equal(resetCalls.length,1);
+ const spent=await(await request('reset-credits/consume',{id:'__main__',operationId,confirmed:true})).json();assert.equal(spent.remaining,1);assert.equal(resetCalls.at(-1).body.operationId,operationId);
+ assert.equal((await fetch(base+'/api/reset-credits/consume',{method:'POST',headers:{Authorization:'Bearer '+widgetKey,'Content-Type':'application/json',Origin:base},body:JSON.stringify({id:'__main__',operationId,confirmed:true})})).status,401);
+
  const refreshResponse=await fetch(base+'/api/widget/refresh',{method:'POST',headers:{Authorization:'Bearer '+widgetKey}});assert.equal(refreshResponse.status,200);
  assert.equal((await fetch(base+'/api/widget/refresh',{method:'POST',headers:{Authorization:'Bearer '+widgetKey}})).status,429);
 });

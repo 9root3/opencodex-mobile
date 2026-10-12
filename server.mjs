@@ -12,7 +12,7 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 const equal = (a,b) => { const x=Buffer.from(hash(a)),y=Buffer.from(hash(b));return timingSafeEqual(x,y); };
 const safeAccount = a => ({id:a.id,label:a.id==='__main__'?'메인 계정':a.label||'풀 계정',plan:a.plan,active:!!a.active,paused:!!a.paused,needsReauth:!!a.needsReauth,health:a.health,priority:a.priority,quota:a.quota||{},refreshStatus:a.quotaRefresh?.status||null});
 
-export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPENCODEX_CLI||'opencodex',execute=run,quotaDir=join(process.env.HOME,'.opencodex'),refreshAccounts}={}) {
+export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPENCODEX_CLI||'opencodex',execute=run,quotaDir=join(process.env.HOME,'.opencodex'),refreshAccounts,resetRequest}={}) {
  await mkdir(dataDir,{recursive:true,mode:0o700});
  const statePath=join(dataDir,'state.json'),codePath=join(dataDir,'pairing-code');
  let state;
@@ -98,6 +98,30 @@ export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPEN
   res.json(snapshot());
  }catch(e){next(e);}});
  app.post('/api/refresh',async(req,res,next)=>{try{res.json(await refresh());}catch(e){next(e);}});
+ const callReset=resetRequest||(async(path,method,body)=>{
+  const {config}=await localState();const port=config.port||10100;
+  if(!Number.isInteger(port)||port<1||port>65535)throw new Error('OpenCodex 포트 설정을 확인하세요.');
+  const admin=process.env.OPENCODEX_ADMIN_AUTH_TOKEN?.trim()||(await readFile(join(quotaDir,'admin-api-token'),'utf8')).trim();
+  const response=await fetch(`http://127.0.0.1:${port}${path}`,{method,headers:{'Content-Type':'application/json','X-OpenCodex-API-Key':admin},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(30000)});
+  const data=await response.json();
+  if(!response.ok)throw new Error(`Reset API 오류 (${response.status}): ${typeof data.code==='string'?data.code:'요청 실패'}`);
+  return data;
+ });
+ app.get('/api/reset-credits',async(req,res,next)=>{try{
+  const id=req.query.id;const {accounts}=await localState();
+  if(typeof id!=='string'||!accounts.some(a=>a.id===id))return res.status(400).json({error:'현재 풀에 없는 계정입니다.'});
+  const data=await callReset('/api/codex-auth/reset-credits?accountId='+encodeURIComponent(id),'GET');
+  res.json({availableCount:Number.isFinite(data.available_count)?data.available_count:null,credits:Array.isArray(data.credits)?data.credits.map(c=>({expiresAt:c.expires_at})):[]});
+ }catch(e){next(e);}});
+ app.post('/api/reset-credits/consume',async(req,res,next)=>{try{
+  const {id,operationId,confirmed}=req.body;const {accounts}=await localState();
+  if(typeof id!=='string'||!accounts.some(a=>a.id===id))return res.status(400).json({error:'현재 풀에 없는 계정입니다.'});
+  if(confirmed!==true||typeof operationId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(operationId))return res.status(400).json({error:'사용 확인과 유효한 요청 ID가 필요합니다.'});
+  if(busy)return res.status(409).json({error:'다른 작업이 진행 중입니다. 잠시 후 같은 요청으로 확인하세요.'});
+  busy=true;
+  try{const data=await callReset('/api/codex-auth/reset-credits/consume','POST',{accountId:id,operationId});res.json({code:data.code,remaining:Number.isFinite(data.remaining)?data.remaining:null,replayed:!!data.replayed});}finally{busy=false;}
+ }catch(e){next(e);}});
+
  app.post('/api/action',async(req,res,next)=>{try{
   if(busy)return res.status(409).json({error:'작업이 진행 중입니다.'});
   const {action,id,value}=req.body;let args;

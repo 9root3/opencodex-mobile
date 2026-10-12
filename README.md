@@ -2,16 +2,20 @@
 
 A personal mobile dashboard and Scriptable widget companion for [OpenCodex](https://github.com/lidge-jun/opencodex).
 
-![App icon](public/icon.svg)
+![App icon](public/icon-192.png)
+
+The sage-green clock icon uses the same graduated green palette as the quota widget.
 
 An independent community companion, not an official OpenCodex or OpenAI app. Each installation connects to its owner's local OpenCodex instance. No hosted central service is included.
 
 ## Features
 
 - Account pool usage, reset times, account selection, pause/resume, priority and rotation controls.
+- Per-account banked reset inspection and explicitly confirmed consumption, relayed through OpenCodex with a UUID operation identity.
 - iPhone Home Screen web app with Web Push notifications.
 - Scriptable widget: five-hour aggregate remaining quota, three upcoming recoveries, weekly quota and two upcoming weekly recoveries.
 - Five-minute widget reload requests; actual timing is controlled by iOS.
+- Final widget layout: quota donut, three colored five-hour recovery tiles, a gray weekly panel with two recovery rows, and compact update/refresh header.
 - Manual widget refresh opens Scriptable and presents an updated preview.
 - No LLM calls for report formatting or scheduling.
 
@@ -57,6 +61,14 @@ The widget key permits cache reads and a rate-limited quota refresh, not account
 ## ngrok helper
 
 Install the ngrok binary into `.tools/ngrok`, then run `python3 scripts/connect-ngrok.py` locally. Token input is hidden; configuration stays in `.data/ngrok.yml`. The ngrok tool is not bundled with this repository. Use its account-assigned development domain and monitor your plan's limits.
+
+## Banked resets
+
+On each account card, select **Reset 조회** to inspect the available count, then **Reset 1개 사용** and confirm to spend one. This uses OpenCodex’s authenticated reset-credit API; account tokens stay on the Mac. No automatic consumption is performed.
+
+An operation UUID is retained in browser session storage when the outcome is uncertain. Use the same pending request to check its result; do not create a new request from another browser after a timeout. OpenCodex owns the durable redemption ledger. Widget credentials cannot inspect or consume resets.
+
+Actual reset consumption is not exercised by automated or live development tests.
 
 ## Validation and limits
 
