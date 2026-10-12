@@ -91,7 +91,7 @@ The deployed Mac installation uses user LaunchAgents for web and tunnel auto-sta
 
 ## Licensing
 
-OpenCodex itself is MIT licensed and installed separately. This repository's own source license has not yet been selected; public visibility does not grant a general reuse license. Check third-party dependency licenses before redistributing a bundled server. In particular `web-push` is MPL-2.0; other dependencies include MIT, ISC, BSD-3-Clause and Apache-2.0 licenses.
+This repository's original code and assets are licensed under [MIT](LICENSE), copyright © 2026 Gyugeun Lee. OpenCodex itself is MIT licensed and installed separately. Third-party dependencies retain their own licenses. Check third-party dependency licenses before redistributing a bundled server. In particular `web-push` is MPL-2.0; other dependencies include MIT, ISC, BSD-3-Clause and Apache-2.0 licenses.
 
 ## Persistent login
 

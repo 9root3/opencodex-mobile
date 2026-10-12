@@ -115,6 +115,6 @@ node --input-type=module --check < scriptable/OpenCodex.js
 
 ## 라이선스
 
-별도로 설치하는 OpenCodex는 MIT 라이선스입니다. 이 저장소 자체의 소스 라이선스는 아직 지정하지 않았으며 공개 상태만으로 일반적인 재사용 권한이 부여되지는 않습니다.
+이 저장소에서 작성한 코드와 자산은 [MIT 라이선스](LICENSE)를 적용합니다. 저작권자는 Gyugeun Lee(2026)입니다. 별도로 설치하는 OpenCodex도 MIT이며, 타사 의존성에는 각자의 라이선스가 유지됩니다.
 
 서버를 의존성과 함께 배포할 때는 각 라이선스 조건을 확인하세요. `web-push`는 MPL-2.0이며 다른 의존성에는 MIT·ISC·BSD-3-Clause·Apache-2.0이 포함됩니다.
