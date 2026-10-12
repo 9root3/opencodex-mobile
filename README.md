@@ -1,5 +1,7 @@
 # OpenCodex Mobile
 
+[English](README.md) | [한국어](README.ko.md)
+
 A personal mobile dashboard and Scriptable widget companion for [OpenCodex](https://github.com/lidge-jun/opencodex).
 
 ![App icon](public/icon-192.png)
@@ -61,6 +63,10 @@ The widget key permits cache reads and a rate-limited quota refresh, not account
 ## ngrok helper
 
 Install the ngrok binary into `.tools/ngrok`, then run `python3 scripts/connect-ngrok.py` locally. Token input is hidden; configuration stays in `.data/ngrok.yml`. The ngrok tool is not bundled with this repository. Use its account-assigned development domain and monitor your plan's limits.
+
+## Temporary token setup
+
+`scripts/token-setup.mjs` is an optional one-time token intake server on loopback port 10301. It requires a random setup code and same-origin HTTPS submission, stores the ngrok token in a restricted local file without logging it, and closes intake after one save or 20 minutes. A temporary HTTPS tunnel must be configured separately. Do not leave it running after setup.
 
 ## Banked resets
 
