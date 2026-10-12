@@ -1,0 +1,2 @@
+self.addEventListener('push',event=>{let data={title:'OpenCodex',body:'새 알림이 있습니다.'};try{data=event.data.json();}catch{}event.waitUntil(self.registration.showNotification(data.title,{body:data.body,tag:'opencodex-usage',data:{url:'/'}}));});
+self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(async windows=>{for(const c of windows){if(new URL(c.url).origin===self.location.origin){await c.navigate('/');return c.focus();}}return clients.openWindow('/');}));});
