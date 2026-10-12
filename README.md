@@ -30,6 +30,24 @@ Quota aggregates weight each account equally. They approximate percentages, not 
 - A stable HTTPS URL pointing to the app for mobile access and Web Push.
 - Scriptable on iPhone for the optional widget.
 
+## Automated macOS installation
+
+```sh
+npm ci
+npm run setup -- --url=https://YOUR-ASSIGNED-DOMAIN.ngrok-free.dev
+```
+
+Setup checks Node/OpenCodex, copies application files to `~/Library/Application Support/OpenCodexMobile`, installs dependencies and ngrok when missing, requests the ngrok token with hidden terminal input when needed, and registers two user LaunchAgents. Existing runtime credentials, push subscriptions and login sessions are preserved. Your ngrok account and assigned domain must already exist. Run in an interactive Mac terminal for initial token entry.
+
+```sh
+npm run update          # Install the current checkout; does not git pull
+npm run service:status # Inspect web/tunnel LaunchAgents
+npm run service:stop   # Unload services; preserve data and service files
+npm run setup          # Resume/re-enable using saved installation settings
+```
+
+Updates use the current source checkout and saved URL. Setup can detect the URL from an already-running ngrok agent, otherwise supply `--url`. No administrator installation is required. Apple permission prompts may still need user interaction. QR pairing and a full uninstall command are not implemented.
+
 ## Run
 
 ```sh
@@ -87,7 +105,7 @@ node --input-type=module --check < scriptable/OpenCodex.js
 
 Tests use injected fake account operations and temporary configuration; they do not change live accounts. Real HTTPS quota refresh and iPhone Web Push were tested during development. Every device and Scriptable layout still needs its own verification.
 
-The deployed Mac installation uses user LaunchAgents for web and tunnel auto-start/recovery. Runtime lives in `~/Library/Application Support/OpenCodexMobile`; source changes must be copied into that runtime before restart. No central hosting, native iOS app or native APNs delivery is included. Management commands still use the installed OpenCodex CLI and depend on its runtime compatibility.
+The deployed Mac installation uses user LaunchAgents for web and tunnel auto-start/recovery. Runtime lives in `~/Library/Application Support/OpenCodexMobile`; run `npm run update` after source changes to install them and restart services. No central hosting, native iOS app or native APNs delivery is included. Management commands still use the installed OpenCodex CLI and depend on its runtime compatibility.
 
 ## Licensing
 

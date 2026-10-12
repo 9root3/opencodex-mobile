@@ -4,7 +4,11 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "setup": "node scripts/install.mjs setup",
+    "update": "node scripts/install.mjs update",
+    "service:status": "node scripts/install.mjs status",
+    "service:stop": "node scripts/install.mjs stop"
   },
   "dependencies": {
     "express": "^5.1.0",

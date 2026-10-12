@@ -32,6 +32,24 @@ OpenCodex 또는 OpenAI의 공식 앱이 아닌 독립적인 연동 도구입니
 
 이 웹앱은 공급자 계정을 새로 등록하지 않습니다.
 
+## macOS 자동 설치
+
+```sh
+npm ci
+npm run setup -- --url=https://YOUR-ASSIGNED-DOMAIN.ngrok-free.dev
+```
+
+설치 도우미는 Node·OpenCodex 상태를 확인하고 사용자 Application Support 폴더에 앱을 설치합니다. 의존성과 ngrok이 없으면 설치하고, 필요한 경우 터미널에서 토큰을 숨겨 입력받습니다. 웹앱·터널 LaunchAgent를 등록합니다. 기존 실행용 폴더의 인증 정보·알림 구독·로그인 세션은 보존합니다. ngrok 가입과 고정 주소 발급은 먼저 완료해야 합니다.
+
+```sh
+npm run update          # 현재 체크아웃을 설치·재시작, git pull은 하지 않음
+npm run service:status # 웹앱·터널 서비스 상태 확인
+npm run service:stop   # 서비스 중지, 데이터와 등록 파일 보존
+npm run setup          # 저장된 설정으로 재활성화·설치 이어가기
+```
+
+처음 토큰을 입력할 때는 Mac의 대화형 터미널에서 실행하세요. 업데이트는 저장된 고정 주소를 재사용합니다. 설치 시 실행 중인 ngrok에서 주소를 찾을 수도 있으며, 없으면 `--url`을 지정해야 합니다. 관리자 설치는 필요하지 않지만 macOS 권한 알림은 직접 승인해야 할 수 있습니다. QR 연결과 완전 제거 명령은 아직 없습니다.
+
 ## 실행
 
 ```sh
@@ -96,7 +114,7 @@ python3 scripts/connect-ngrok.py
 
 현재 운영 Mac에는 웹앱·ngrok을 사용자 LaunchAgent로 등록했습니다. Mac 로그인 시 시작하고 종료되면 재실행합니다. 프로세스 종료 후 재시작, 고정 주소 복구, 기존 로그인 유지를 실제 확인했습니다. Mac 재부팅·로그인 전체 과정은 별도 확인이 필요합니다.
 
-실행용 설치 위치는 `~/Library/Application Support/OpenCodexMobile`입니다. 소스 수정 후 이 실행용 설치에도 파일을 반영하고 서비스를 재시작해야 합니다. 사용자별 LaunchAgent 설정은 비공개 `.data`에 보관하며 이 저장소가 자동 설치해 주는 것은 아닙니다.
+실행용 설치 위치는 `~/Library/Application Support/OpenCodexMobile`입니다. 소스 수정 후 `npm run update`로 실행용 설치를 갱신하고 서비스를 재시작합니다. 설치 도우미가 사용자별 LaunchAgent 설정을 생성하며, 인증 정보와 설치 상태는 비공개 실행용 `.data`에 보관합니다.
 
 세션 원문 대신 해시만 `.data/sessions.json`에 저장합니다. `.data`에는 VAPID 키·알림 구독·위젯 키·ngrok 인증 정보도 들어 있으므로 공유하거나 커밋하지 마세요. Mac 잠자기·로그아웃 동안에는 서비스가 중단됩니다.
 
