@@ -41,3 +41,19 @@ test('Authentication, origin validation, read-only refresh, management allowlist
  const refreshResponse=await fetch(base+'/api/widget/refresh',{method:'POST',headers:{Authorization:'Bearer '+widgetKey}});assert.equal(refreshResponse.status,200);
  assert.equal((await fetch(base+'/api/widget/refresh',{method:'POST',headers:{Authorization:'Bearer '+widgetKey}})).status,429);
 });
+
+test('Session survives restart and logout revokes persisted token',async t=>{
+ const dataDir=await mkdtemp(join(tmpdir(),'ocx-session-test-'));
+ await writeFile(join(dataDir,'config.json'),JSON.stringify({codexAccounts:[]}));
+ const first=await createApp({dataDir,quotaDir:dataDir});const s1=first.app.listen(0,'127.0.0.1');await new Promise(r=>s1.once('listening',r));
+ const b1=`http://127.0.0.1:${s1.address().port}`;const code=await readFile(first.codePath,'utf8');
+ const login=await fetch(b1+'/api/login',{method:'POST',headers:{Origin:b1,'Content-Type':'application/json'},body:JSON.stringify({code})});const cookie=login.headers.get('set-cookie').split(';')[0];
+ await new Promise(r=>s1.close(r));
+ const second=await createApp({dataDir,quotaDir:dataDir});const s2=second.app.listen(0,'127.0.0.1');await new Promise(r=>s2.once('listening',r));t.after(()=>s2.close());
+ assert.equal(await readFile(second.codePath,'utf8'),code);
+ const b2=`http://127.0.0.1:${s2.address().port}`;
+ const state=await fetch(b2+'/api/state',{headers:{Cookie:cookie}});assert.equal(state.status,200);assert.ok(state.headers.get('set-cookie').includes('Max-Age=34560000'));
+ assert.equal((await fetch(b2+'/api/logout',{method:'POST',headers:{Cookie:cookie,Origin:b2,'Content-Type':'application/json'},body:'{}'})).status,200);
+ assert.equal((await fetch(b2+'/api/state',{headers:{Cookie:cookie}})).status,401);
+ assert.deepEqual(JSON.parse(await readFile(join(dataDir,'sessions.json'),'utf8')),{});
+});

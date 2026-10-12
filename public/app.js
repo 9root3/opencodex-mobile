@@ -77,3 +77,5 @@ $("#copy-widget").onclick=async()=>{
  }catch(error){status.textContent=error.name==='NotAllowedError'?'복사 권한이 거부됐습니다. Safari에서 다시 누르거나 코드 보기에서 전체 복사해주세요.':error.message;}
  finally{button.disabled=false;}
 };
+
+$('#logout').onclick=()=>perform(async()=>{await api('logout',{});location.reload();});

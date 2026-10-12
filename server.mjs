@@ -18,10 +18,15 @@ export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPEN
  let state;
  try {state=JSON.parse(await readFile(statePath,'utf8'));} catch(e) {if(e.code!=='ENOENT')throw e;state={vapid:webpush.generateVAPIDKeys(),subscriptions:[],notificationsEnabled:false,lastSlot:null};}
  const save=async()=>{await writeFile(statePath+'.tmp',JSON.stringify(state),{mode:0o600});await rename(statePath+'.tmp',statePath);};
- const pairingCode=randomBytes(18).toString('base64url');
- await writeFile(codePath,pairingCode,{mode:0o600});await chmod(codePath,0o600);await save();
+ let pairingCode;
+ try{pairingCode=(await readFile(codePath,'utf8')).trim();}catch(e){if(e.code!=='ENOENT')throw e;pairingCode=randomBytes(18).toString('base64url');await writeFile(codePath,pairingCode,{mode:0o600});}
+ await chmod(codePath,0o600);await save();
  webpush.setVapidDetails(process.env.VAPID_SUBJECT || 'https://example.com',state.vapid.publicKey,state.vapid.privateKey);
- const sessions=new Map(),attempts=new Map();
+ const sessionsPath=join(dataDir,'sessions.json');
+ let storedSessions={};try{storedSessions=JSON.parse(await readFile(sessionsPath,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+ const sessions=new Map(Object.entries(storedSessions)),attempts=new Map();
+ const persistSessions=async()=>{await writeFile(sessionsPath+'.tmp',JSON.stringify(Object.fromEntries(sessions)),{mode:0o600});await rename(sessionsPath+'.tmp',sessionsPath);};
+ const sessionCookie=(token,secure)=>`ocx_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=34560000${secure?'; Secure':''}`;
  const widgetKeyPath=join(dataDir,'widget-key');
  let widgetKey;
  try{widgetKey=(await readFile(widgetKeyPath,'utf8')).trim();}catch(e){if(e.code!=='ENOENT')throw e;widgetKey=randomBytes(32).toString('base64url');await writeFile(widgetKeyPath,widgetKey,{mode:0o600});}
@@ -68,20 +73,21 @@ export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPEN
   }
   if(req.path==='/login')return next();
   const raw=req.get('authorization')?.replace(/^Bearer /,'')||(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('ocx_session='))?.slice(12);
-  const expires=raw?sessions.get(hash(raw)):0;
-  if(!expires||expires<Date.now())return res.status(401).json({error:'Mac 연결 코드로 로그인하세요.'});
-  next();
+  if(!raw||!sessions.has(hash(raw)))return res.status(401).json({error:'Mac 연결 코드로 로그인하세요.'});
+  res.set('Set-Cookie',sessionCookie(raw,process.env.PUBLIC_HTTPS==='1'||req.secure));
+  req.sessionHash=hash(raw);next();
  });
- app.post('/api/login',(req,res)=>{
+ app.post('/api/login',async(req,res,next)=>{try{
   const key=req.socket.remoteAddress;const record=attempts.get(key)||{count:0,start:Date.now()};
   if(Date.now()-record.start>600000){record.count=0;record.start=Date.now();}
   record.count++;attempts.set(key,record);
   if(record.count>10)return res.status(429).json({error:'잠시 후 다시 시도하세요.'});
   if(typeof req.body.code!=='string'||!equal(req.body.code.trim(),pairingCode))return res.status(401).json({error:'연결 코드가 맞지 않습니다.'});
-  attempts.delete(key);const token=randomBytes(32).toString('base64url');sessions.set(hash(token),Date.now()+7*86400000);
+  attempts.delete(key);const token=randomBytes(32).toString('base64url');sessions.set(hash(token),{createdAt:Date.now()});await persistSessions();
   const secure=process.env.PUBLIC_HTTPS==='1'||req.secure;
-  res.set('Set-Cookie',`ocx_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=604800${secure?'; Secure':''}`);res.json({ok:true,...(req.get('x-opencodex-client')==='ios'?{sessionToken:token}:{})});
- });
+  res.set('Set-Cookie',sessionCookie(token,secure));res.json({ok:true,...(req.get('x-opencodex-client')==='ios'?{sessionToken:token}:{})});
+ }catch(e){next(e);}});
+ app.post('/api/logout',async(req,res,next)=>{try{sessions.delete(req.sessionHash);await persistSessions();res.set('Set-Cookie','ocx_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');res.json({ok:true});}catch(e){next(e);}});
  app.get('/api/widget',async(req,res,next)=>{try{
   // Widget credentials cannot manage accounts.
   const local=await localState();

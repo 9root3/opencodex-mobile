@@ -39,7 +39,7 @@ npm start
 
 The default listener is `127.0.0.1:10300`. Publish only this companion through your chosen tunnel, not the original OpenCodex administrative listener. Preserve the public Host header at the proxy.
 
-Read `.data/pairing-code` locally to sign in. Server restart rotates the code and invalidates management sessions. The app stores VAPID credentials, subscriptions and its widget key inside `.data`; never share or commit that directory.
+Read `.data/pairing-code` locally to sign in. Server restarts preserve the pairing code and hashed login sessions. Server-side sessions have no expiry until logout/revocation; browser cookies are renewed for 400 days on authenticated access. Browser data deletion can still require login. The app stores VAPID credentials, subscriptions and its widget key inside `.data`; never share or commit that directory.
 
 Configuration options: `PORT`, `HOST`, `PUBLIC_HTTPS`, `VAPID_SUBJECT`, `OPENCODEX_CLI`. `.env.example` documents variables; `.env` is not loaded automatically. OpenCodex configuration currently uses `~/.opencodex`, and quota refresh uses its authenticated loopback API.
 
@@ -81,8 +81,12 @@ node --input-type=module --check < scriptable/OpenCodex.js
 
 Tests use injected fake account operations and temporary configuration; they do not change live accounts. Real HTTPS quota refresh and iPhone Web Push were tested during development. Every device and Scriptable layout still needs its own verification.
 
-No auto-start service, central hosting, native iOS app or native APNs delivery is included. Management commands still use the installed OpenCodex CLI and depend on its runtime compatibility.
+The deployed Mac installation uses user LaunchAgents for web and tunnel auto-start/recovery. Runtime lives in `~/Library/Application Support/OpenCodexMobile`; source changes must be copied into that runtime before restart. No central hosting, native iOS app or native APNs delivery is included. Management commands still use the installed OpenCodex CLI and depend on its runtime compatibility.
 
 ## Licensing
 
 OpenCodex itself is MIT licensed and installed separately. This repository's own source license has not yet been selected; public visibility does not grant a general reuse license. Check third-party dependency licenses before redistributing a bundled server. In particular `web-push` is MPL-2.0; other dependencies include MIT, ISC, BSD-3-Clause and Apache-2.0 licenses.
+
+## Persistent login
+
+Only hashes of session tokens are saved in `.data/sessions.json` with restricted permissions. The app provides logout to revoke the current token. There is no seven-day server expiry; cookie persistence remains subject to browser policy.
