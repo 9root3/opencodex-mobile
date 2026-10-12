@@ -145,6 +145,12 @@ export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPEN
   if(state.subscriptions.length>=10&&!state.subscriptions.some(x=>x.endpoint===s.endpoint))return res.status(400).json({error:'기기 등록 한도를 초과했습니다.'});
   state.subscriptions=state.subscriptions.filter(x=>x.endpoint!==s.endpoint);state.subscriptions.push(s);await save();res.json({ok:true});
  }catch(e){next(e);}});
+ app.post('/api/push/keep-device',async(req,res,next)=>{try{
+  const endpoint=req.body.endpoint;
+  if(typeof endpoint!=='string'||!state.subscriptions.some(s=>s.endpoint===endpoint))return res.status(400).json({error:'등록된 기기만 유지할 수 있습니다.'});
+  const removed=state.subscriptions.length-1;
+  state.subscriptions=state.subscriptions.filter(s=>s.endpoint===endpoint);await save();res.json({removed,remaining:state.subscriptions.length});
+ }catch(e){next(e);}});
  app.post('/api/push/settings',async(req,res,next)=>{try{if(typeof req.body.enabled!=='boolean')return res.status(400).json({error:'알림 설정이 올바르지 않습니다.'});state.notificationsEnabled=req.body.enabled;await save();res.json(snapshot());}catch(e){next(e);}});
  app.post('/api/push/test',async(req,res,next)=>{try{res.json(await notify('OpenCodex 연결 테스트','이 알림이 iPhone에 표시되면 푸시 연결이 완료됐습니다.'));}catch(e){next(e);}});
  app.use(express.static(join(root,'public')));
