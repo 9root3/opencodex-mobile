@@ -100,7 +100,7 @@ npm run setup -- --url=https://YOUR-ASSIGNED-DOMAIN.ngrok-free.dev
 
 ### Android
 
-1. [GitHub Actions](https://github.com/9root3/opencodex-mobile/actions/workflows/android.yml)의 성공한 빌드에서 QA APK를 다운로드·설치합니다. Artifacts 다운로드는 GitHub 로그인이 필요합니다.
+1. [APK 다운로드](https://github.com/9root3/opencodex-mobile/releases/download/android-qa/opencodex-quota.apk)에서 QA APK를 다운로드·설치합니다. Android가 요청하면 해당 다운로드 출처의 앱 설치를 허용합니다.
 2. Chrome에서 본인의 웹앱에 로그인하고 **Android 위젯 연결**을 누릅니다.
 3. 앱에서 서버 주소를 확인하고 **연결**을 누릅니다. 주소·키는 직접 입력할 필요가 없습니다.
 4. 홈 화면 위젯 추가를 허용합니다. 추가 창이 없는 런처는 홈 화면을 길게 눌러 위젯 → OpenCodex quota를 선택합니다.

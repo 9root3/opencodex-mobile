@@ -9,6 +9,8 @@ permissions:
   contents: read
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,3 +30,24 @@ jobs:
         with:
           name: opencodex-quota-android-qa
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Build signed QA APK
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/quota.jks"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+          chmod 600 "$ANDROID_KEYSTORE_PATH"
+          gradle -p android assembleRelease
+          rm "$ANDROID_KEYSTORE_PATH"
+          cp android/app/build/outputs/apk/release/app-release.apk opencodex-quota.apk
+      - name: Publish QA APK
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view android-qa || gh release create android-qa --target "$GITHUB_SHA" --prerelease --title "Android widget QA" --notes "Android widget QA build. Install the APK, then connect from your web dashboard. Device verification is ongoing."
+          gh release upload android-qa opencodex-quota.apk --clobber

@@ -87,7 +87,7 @@ The widget shows pool-wide five-hour remaining quota, three upcoming recoveries,
 
 ### Android
 
-Install the QA APK from a successful [Android build](https://github.com/9root3/opencodex-mobile/actions/workflows/android.yml), open your dashboard in Chrome and tap **Android 위젯 연결**. Confirm the server in the app and accept the home-screen widget prompt. The server URL and widget key are passed automatically; no manual entry is required. Manual entry remains available as a fallback.
+Install the QA APK from [the QA download](https://github.com/9root3/opencodex-mobile/releases/download/android-qa/opencodex-quota.apk), open your dashboard in Chrome and tap **Android 위젯 연결**. Confirm the server in the app and accept the home-screen widget prompt. The server URL and widget key are passed automatically; no manual entry is required. Manual entry remains available as a fallback.
 
 The widget reproduces the Scriptable design. Refresh works without opening the app. Background cache reads request a 30-minute interval but can be delayed by Android power management. Device verification and stable signed distribution remain pending. See [Android setup and QA](../android/README.md).
 

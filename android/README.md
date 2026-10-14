@@ -4,7 +4,7 @@ A small native companion to the existing web dashboard. It uses the read-only wi
 
 ## User setup
 
-1. Install the QA APK from the latest successful **Android widget QA build** in GitHub Actions (Artifacts → `opencodex-quota-android-qa`). GitHub sign-in is required to download artifacts. Unzip and install the APK; allow installation from that source if Android asks.
+1. Install the QA APK from the latest successful **Android widget QA build** in APK 다운로드 (Artifacts → `opencodex-quota-android-qa`). GitHub sign-in is required to download artifacts. Unzip and install the APK; allow installation from that source if Android asks.
 2. Open your existing web dashboard in Chrome and log in.
 3. Tap **Android 위젯 연결**. Confirm the displayed server address in the app.
 4. Accept the launcher's **Add widget** prompt. If unsupported, long-press the home screen and choose Widgets → OpenCodex quota.
@@ -29,6 +29,6 @@ Android 8+ (API 26), JDK 17, Gradle 8.11.1 and Android SDK 35. Run:
 gradle -p android testDebugUnitTest assembleDebug lintDebug
 ```
 
-The GitHub workflow builds a debug APK. Debug signatures may change across CI runs, requiring uninstall/reconnect; this is not a stable production distribution. A persistent signing key and release distribution are still needed. Never commit signing keys.
+The GitHub workflow builds a debug APK. Main-branch CI also builds a QA release APK with a persistent private signing key stored in GitHub Secrets, and publishes it under the `android-qa` prerelease. Future signed QA updates preserve app data. Keep a private backup of the signing key; never commit it. This is QA distribution, not a verified production release.
 
 Check on a real device: Chrome connection, server confirmation, widget pinning, sizing, fresh/cache/offline states, refresh without opening the app, background updates, restart persistence, and opening the dashboard. Do not spend reset credits during QA.
