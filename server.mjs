@@ -1,4 +1,5 @@
 import express from 'express';
+import {homedir} from 'node:os';
 import webpush from 'web-push';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -12,7 +13,7 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 const equal = (a,b) => { const x=Buffer.from(hash(a)),y=Buffer.from(hash(b));return timingSafeEqual(x,y); };
 const safeAccount = a => ({id:a.id,label:a.id==='__main__'?'메인 계정':a.label||'풀 계정',plan:a.plan,active:!!a.active,paused:!!a.paused,needsReauth:!!a.needsReauth,health:a.health,priority:a.priority,quota:a.quota||{},refreshStatus:a.quotaRefresh?.status||null});
 
-export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPENCODEX_CLI||'opencodex',execute=run,quotaDir=join(process.env.HOME,'.opencodex'),refreshAccounts,resetRequest}={}) {
+export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPENCODEX_CLI||'opencodex',execute=run,quotaDir=join(homedir(),'.opencodex'),refreshAccounts,resetRequest}={}) {
  await mkdir(dataDir,{recursive:true,mode:0o700});
  const statePath=join(dataDir,'state.json'),codePath=join(dataDir,'pairing-code');
  let state;
@@ -37,7 +38,7 @@ export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPEN
   const accounts=[{id:'__main__',label:'메인 계정'},...(config.codexAccounts||[]).filter(a=>a.id!=='__main__').map(a=>({...a,label:a.alias||a.logLabel||'풀 계정'}))];
   return {config,accounts:accounts.map(a=>({...a,active:config.activeCodexAccountId===a.id,paused:config.pausedCodexAccountIds?.includes(a.id),quota:cache.quotas?.[a.id]||{},refreshStatus:null}))};
  };
- const command=async args=>{try{const {stdout}=await execute(cli,['account',...args,'--json'],{timeout:60000,maxBuffer:2*1024*1024});return JSON.parse(stdout);}catch{throw new Error('OpenCodex 요청에 실패했습니다. Mac에서 프록시와 로그인 상태를 확인하세요.');}};
+ const command=async args=>{try{const {stdout}=await execute(process.env.OPENCODEX_CLI_NODE==='1'?process.execPath:cli,[...(process.env.OPENCODEX_CLI_NODE==='1'?[cli]:[]),'account',...args,'--json'],{timeout:60000,maxBuffer:2*1024*1024});return JSON.parse(stdout);}catch{throw new Error('OpenCodex 요청에 실패했습니다. 서버 컴퓨터에서 프록시와 로그인 상태를 확인하세요.');}};
  const snapshot=()=>({accounts:roster.map(safeAccount),observedAt,notice,notificationsEnabled:state.notificationsEnabled,subscriptionCount:state.subscriptions.length,schedule:{weekdays:'09:00–10:30 · 20:00–23:30 / 30분',weekends:'12:00–20:00 / 1시간'},publicKey:state.vapid.publicKey});
  const upstreamRefresh=refreshAccounts||(async()=>{
   const config=JSON.parse(await readFile(join(quotaDir,'config.json'),'utf8'));
@@ -73,7 +74,7 @@ export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPEN
   }
   if(req.path==='/login')return next();
   const raw=req.get('authorization')?.replace(/^Bearer /,'')||(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('ocx_session='))?.slice(12);
-  if(!raw||!sessions.has(hash(raw)))return res.status(401).json({error:'Mac 연결 코드로 로그인하세요.'});
+  if(!raw||!sessions.has(hash(raw)))return res.status(401).json({error:'서버 연결 코드로 로그인하세요.'});
   res.set('Set-Cookie',sessionCookie(raw,process.env.PUBLIC_HTTPS==='1'||req.secure));
   req.sessionHash=hash(raw);next();
  });
@@ -158,7 +159,7 @@ export async function createApp({dataDir=join(root,'.data'),cli=process.env.OPEN
   state.subscriptions=state.subscriptions.filter(s=>s.endpoint===endpoint);await save();res.json({removed,remaining:state.subscriptions.length});
  }catch(e){next(e);}});
  app.post('/api/push/settings',async(req,res,next)=>{try{if(typeof req.body.enabled!=='boolean')return res.status(400).json({error:'알림 설정이 올바르지 않습니다.'});state.notificationsEnabled=req.body.enabled;await save();res.json(snapshot());}catch(e){next(e);}});
- app.post('/api/push/test',async(req,res,next)=>{try{res.json(await notify('OpenCodex 연결 테스트','이 알림이 iPhone에 표시되면 푸시 연결이 완료됐습니다.'));}catch(e){next(e);}});
+ app.post('/api/push/test',async(req,res,next)=>{try{res.json(await notify('OpenCodex 연결 테스트','이 알림이 휴대폰에 표시되면 푸시 연결이 완료됐습니다.'));}catch(e){next(e);}});
  app.use(express.static(join(root,'public')));
  app.use((error,req,res,next)=>{res.status(500).json({error:error.message||'요청에 실패했습니다.'});});
  const tick=async()=>{

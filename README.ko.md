@@ -10,6 +10,12 @@
 
 OpenCodex 또는 OpenAI의 공식 앱이 아닌 독립적인 연동 도구입니다. 사용자마다 본인의 Mac에서 실행 중인 OpenCodex에 연결합니다. 공용 중계 서버는 포함하지 않습니다.
 
+## 처음 설치하기
+
+[Quick Start — 컴퓨터 준비부터 휴대폰 연결·알림·위젯까지](docs/QUICKSTART.ko.md)
+
+Mac·Windows와 iPhone·Android의 현재 지원 범위 및 단계별 안내를 확인하세요. Mac·Windows 자동 설치를 지원합니다. Windows 실기기 검증, QR 연결과 Android 위젯은 남아 있습니다.
+
 ## 기능
 
 - 계정 풀 사용량·리셋 시각 확인, 계정 선택, 일시 중지·재개, 우선순위·Rotation 설정
@@ -50,6 +56,14 @@ npm run setup          # 저장된 설정으로 재활성화·설치 이어가�
 
 처음 토큰을 입력할 때는 Mac의 대화형 터미널에서 실행하세요. 업데이트는 저장된 고정 주소를 재사용합니다. 설치 시 실행 중인 ngrok에서 주소를 찾을 수도 있으며, 없으면 `--url`을 지정해야 합니다. 관리자 설치는 필요하지 않지만 macOS 권한 알림은 직접 승인해야 할 수 있습니다. QR 연결과 완전 제거 명령은 아직 없습니다.
 
+## Windows 자동 설치
+
+Windows 10/11 x64의 PowerShell에서도 동일하게 `npm ci`와 `npm run setup -- --url=https://YOUR-ASSIGNED-DOMAIN.ngrok-free.dev`를 실행합니다. Node.js 20 이상, Git, npm으로 전역 설치한 OpenCodex(`@bitkyc08/opencodex`)가 필요합니다. OpenCodex는 먼저 실행하고 계정을 등록하세요. WSL 설치가 아닌 Windows 네이티브 설치를 사용합니다.
+
+실행용 위치는 `%LOCALAPPDATA%\OpenCodexMobile`입니다. 작업 스케줄러에 현재 사용자 로그인 시 실행하는 작업을 등록하고 즉시 시작합니다. 웹앱·ngrok이 종료되면 10초 후 다시 실행하며, 감시 프로세스의 실패는 작업 스케줄러가 1분 간격으로 재시도합니다. 로그아웃·잠자기 중에는 접속할 수 없습니다. OpenCodex 자체의 자동 시작은 이 설치 도구에서 관리하지 않습니다.
+
+`npm run service:status`, `npm run service:stop`, `npm run update`를 동일하게 사용합니다. 중지는 자동 시작도 비활성화하며 `npm run setup`으로 다시 활성화합니다. Windows 설치 코드와 프로세스 복구 테스트는 추가했지만 Windows에서 실제 설치·재로그인은 아직 검증하지 않았습니다.
+
 ## 실행
 
 ```sh
@@ -67,7 +81,7 @@ Mac의 `.data/pairing-code`를 확인해 로그인합니다. 연결 코드와 �
 
 ## iPhone 설치와 알림
 
-1. Safari에서 HTTPS 주소를 열고 Mac 연결 코드로 로그인합니다.
+1. Safari에서 HTTPS 주소를 열고 서버 연결 코드로 로그인합니다.
 2. 공유 → 홈 화면에 추가를 선택합니다.
 3. 홈 화면 앱을 열어 **이 기기 알림 등록 → 테스트**를 실행합니다.
 4. 원하는 경우 **예약 사용량 알림 켜기**를 선택합니다.

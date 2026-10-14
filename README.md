@@ -10,6 +10,12 @@ The sage-green clock icon uses the same graduated green palette as the quota wid
 
 An independent community companion, not an official OpenCodex or OpenAI app. Each installation connects to its owner's local OpenCodex instance. No hosted central service is included.
 
+## Start here
+
+[Quick Start — from server preparation to phone connection, notifications and widgets](docs/QUICKSTART.md)
+
+Choose your computer and phone and follow one setup sequence. Automated installation supports Mac and Windows; Windows device verification, QR pairing and the Android widget remain pending.
+
 ## Features
 
 - Account pool usage, reset times, account selection, pause/resume, priority and rotation controls.
@@ -47,6 +53,14 @@ npm run setup          # Resume/re-enable using saved installation settings
 ```
 
 Updates use the current source checkout and saved URL. Setup can detect the URL from an already-running ngrok agent, otherwise supply `--url`. No administrator installation is required. Apple permission prompts may still need user interaction. QR pairing and a full uninstall command are not implemented.
+
+## Automated Windows installation
+
+Use the same `npm ci` and `npm run setup -- --url=https://YOUR-ASSIGNED-DOMAIN.ngrok-free.dev` commands in PowerShell on Windows 10/11 x64. Install Node.js 20+, Git and OpenCodex globally through npm (`@bitkyc08/opencodex`); start OpenCodex and register accounts first. This supports native Windows, not a WSL installation.
+
+Runtime files live in `%LOCALAPPDATA%\OpenCodexMobile`. A current-user scheduled task starts at login and immediately after setup. A supervisor restarts the web app and ngrok 10 seconds after exit; Task Scheduler retries a failed supervisor every minute. Access stops during logout or sleep. The installer does not manage OpenCodex itself.
+
+Use the same `service:status`, `service:stop` and `update` npm scripts. Stop also disables automatic startup; setup re-enables it. Process recovery tests pass, but actual installation and login startup on Windows have not been verified yet.
 
 ## Run
 

@@ -4,7 +4,7 @@ import {execFileSync,spawnSync} from 'node:child_process';
 import {homedir} from 'node:os';
 import {join,dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-export const managedFiles=['server.mjs','public','package.json','package-lock.json','README.md','README.ko.md','LICENSE'];
+export const managedFiles=['server.mjs','public','package.json','package-lock.json','README.md','README.ko.md','docs','runtime','LICENSE'];
 export async function copySource(source,target){
  await mkdir(target,{recursive:true,mode:0o700});
  for(const file of managedFiles)await cp(join(source,file),join(target,file),{recursive:true});
@@ -13,8 +13,9 @@ const exists=async p=>{try{await access(p);return true;}catch{return false;}};
 const xml=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 export function agentPlist(label,args,root,env){return `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>Label</key><string>${xml(label)}</string><key>ProgramArguments</key><array>${args.map(a=>'<string>'+xml(a)+'</string>').join('')}</array><key>WorkingDirectory</key><string>${xml(root)}</string><key>EnvironmentVariables</key><dict>${Object.entries(env).map(([k,v])=>'<key>'+xml(k)+'</key><string>'+xml(v)+'</string>').join('')}</dict><key>RunAtLoad</key><true/><key>KeepAlive</key><true/><key>ThrottleInterval</key><integer>10</integer><key>StandardOutPath</key><string>${xml(join(root,'.data',label+'.log'))}</string><key>StandardErrorPath</key><string>${xml(join(root,'.data',label+'.error.log'))}</string></dict></plist>`;}
 async function main(){
- if(process.platform!=='darwin')throw Error('This installer currently supports macOS only.');
  if(Number(process.versions.node.split('.')[0])<20)throw Error('Node.js 20+ is required.');
+ if(process.platform==='win32'){const {installWindows}=await import('./install-windows.mjs');return installWindows(dirname(dirname(fileURLToPath(import.meta.url))));}
+ if(process.platform!=='darwin')throw Error('This installer supports macOS and Windows.');
  const source=dirname(dirname(fileURLToPath(import.meta.url))),root=join(homedir(),'Library/Application Support/OpenCodexMobile');
  const mode=process.argv[2]||'setup',domain=`gui/${process.getuid()}`,labels=['org.opencodex.mobile.web','org.opencodex.mobile.tunnel'];
  const run=(cmd,args)=>execFileSync(cmd,args,{stdio:'inherit'});

@@ -6,7 +6,7 @@ import {join} from 'node:path';
 import {copySource,managedFiles,agentPlist} from './install.mjs';
 test('Runtime update preserves secrets and sessions, excludes source private data',async()=>{
  const source=await mkdtemp(join(tmpdir(),'ocx-install-src-')),target=await mkdtemp(join(tmpdir(),'ocx-install-dst-'));
- for(const file of managedFiles){if(file==='public'){await mkdir(join(source,file));await writeFile(join(source,file,'index.html'),'new UI');}else await writeFile(join(source,file),'updated');}
+ for(const file of managedFiles){if(['public','docs','runtime'].includes(file)){await mkdir(join(source,file));await writeFile(join(source,file,'index.html'),'new UI');}else await writeFile(join(source,file),'updated');}
  for(const root of [source,target])await mkdir(join(root,'.data'));
  await writeFile(join(source,'.data/state.json'),'source secret');await writeFile(join(target,'.data/state.json'),'existing keys');await writeFile(join(target,'.data/sessions.json'),'existing sessions');
  await copySource(source,target);
