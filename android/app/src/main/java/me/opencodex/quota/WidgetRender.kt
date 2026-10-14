@@ -42,7 +42,9 @@ object WidgetRender {
         var angle=-90f
         paint.style=Paint.Style.STROKE;paint.strokeWidth=ringSize*.15f
         val bounds=RectF(cx-radius,cy-radius,cx+radius,cy+radius)
-        for((value,color) in parts+listOf(max(0.0,100-parts.sumOf{it.first}) to colors[4])) {paint.style=Paint.Style.STROKE;paint.strokeWidth=ringSize*.15f;paint.color=color;val sweep=(value*3.6).toFloat();canvas.drawArc(bounds,angle,sweep,false,paint);angle+=sweep}
+        for((value,color) in parts+listOf(max(0.0,100-parts.sumOf{it.first}) to colors[4])) {paint.style=Paint.Style.STROKE;paint.strokeWidth=ringSize*.15f;paint.color=color;val sweep=(value*3.6).toFloat();canvas.drawArc(bounds,angle,sweep,false,paint)
+            if(color!=colors[0] && color!=colors[4] && value>=12){val mid=Math.toRadians((angle+sweep/2).toDouble());text("+${value.roundToInt()}",cx+radius*cos(mid).toFloat(),cy+radius*sin(mid).toFloat()+3,ringSize*.095f,bold=true,align=Paint.Align.CENTER)}
+            angle+=sweep}
         text(pool.remaining?.let{"${it.roundToInt()}%"} ?: "—",cx,cy+4,ringSize*.21f,bold=true,align=Paint.Align.CENTER)
         text("5h",cx,cy+ringSize*.20f,ringSize*.09f,align=Paint.Align.CENTER)
         val left=16+ringSize+10;val right=w-16;val rw=right-left;val top=39f;val cardHeight=(ringSize-6)/2;val cardWidth=(rw-8)/3

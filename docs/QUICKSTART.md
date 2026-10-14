@@ -9,9 +9,9 @@ Use the same sequence for every device: **prepare your computer → install the 
 | Computer | Phone | Current support |
 |---|---|---|
 | Mac | iPhone | Automated installation, web app, Web Push and Scriptable widget; checked in the development environment. |
-| Mac | Android | Connect to the same web app after Mac setup; device layout and push delivery need real-device verification. No Android widget yet. |
+| Mac | Android | Connect to the same web app after Mac setup; device layout and push delivery need real-device verification. Android QA widget added. |
 | Windows | iPhone | Windows installation, login startup and process recovery are implemented; real-device verification remains pending. iPhone uses the same web app and Scriptable widget. |
-| Windows | Android | Windows setup connects to the same web app; Windows/Android device verification and the Android widget remain pending. |
+| Windows | Android | Windows setup connects to the same web app; Windows/Android device verification remain pending. |
 
 If you already have a Mac server, start at step 4 on either phone. Windows users follow the same installation sequence below.
 
@@ -87,7 +87,9 @@ The widget shows pool-wide five-hour remaining quota, three upcoming recoveries,
 
 ### Android
 
-The web app is available, but **this project does not provide an Android home-screen widget yet**. Do not attempt to install Scriptable code on Android. The planned Android widget will show the same pool totals and recovery schedule.
+Install the QA APK from a successful [Android build](https://github.com/9root3/opencodex-mobile/actions/workflows/android.yml), open your dashboard in Chrome and tap **Android 위젯 연결**. Confirm the server in the app and accept the home-screen widget prompt. The server URL and widget key are passed automatically; no manual entry is required. Manual entry remains available as a fallback.
+
+The widget reproduces the Scriptable design. Refresh works without opening the app. Background cache reads request a 30-minute interval but can be delayed by Android power management. Device verification and stable signed distribution remain pending. See [Android setup and QA](../android/README.md).
 
 ## Troubleshooting
 
