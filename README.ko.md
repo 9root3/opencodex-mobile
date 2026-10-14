@@ -14,7 +14,11 @@ OpenCodex 또는 OpenAI의 공식 앱이 아닌 독립적인 연동 도구입니
 
 [Quick Start — 컴퓨터 준비부터 휴대폰 연결·알림·위젯까지](docs/QUICKSTART.ko.md)
 
-Mac·Windows와 iPhone·Android의 현재 지원 범위 및 단계별 안내를 확인하세요. Mac·Windows 자동 설치를 지원합니다. Windows 실기기 검증, QR 연결과 Android 위젯은 남아 있습니다.
+Mac·Windows와 iPhone·Android의 현재 지원 범위 및 단계별 안내를 확인하세요. Mac·Windows 자동 설치를 지원합니다. Windows 실기기 검증, QR 연결과 Android 위젯 실기기 검증은 남아 있습니다.
+
+## Android 위젯 (QA)
+
+[설치·빌드·QA 안내](android/README.md): QA APK 설치 후 웹앱에서 **Android 위젯 연결**을 누르고 서버 연결·홈 화면 추가를 확인합니다. 주소와 키는 자동 전달하며 기존 Scriptable 디자인을 재현합니다. 실기기 검증과 정식 배포는 남아 있습니다.
 
 ## 기능
 

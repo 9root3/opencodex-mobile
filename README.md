@@ -14,7 +14,11 @@ An independent community companion, not an official OpenCodex or OpenAI app. Eac
 
 [Quick Start — from server preparation to phone connection, notifications and widgets](docs/QUICKSTART.md)
 
-Choose your computer and phone and follow one setup sequence. Automated installation supports Mac and Windows; Windows device verification, QR pairing and the Android widget remain pending.
+Choose your computer and phone and follow one setup sequence. Automated installation supports Mac and Windows; Windows device verification, QR pairing and Android widget device verification remain pending.
+
+## Android widget (QA)
+
+[Setup, build and QA](android/README.md): install the QA APK, tap **Android 위젯 연결** in the web dashboard, confirm the server and add the widget. The app uses the existing read-only API and reproduces the Scriptable design. Device verification and stable release distribution remain pending.
 
 ## Features
 

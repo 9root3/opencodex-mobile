@@ -5,7 +5,7 @@ async function api(path,body){const r=await fetch('/api/'+path,{method:body===un
 const date=value=>value?new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(value*1000):'미확인';
 const percentage=value=>typeof value==='number'?`${value}%`:'—';
 async function perform(fn){const buttons=[...document.querySelectorAll('button')];buttons.forEach(b=>b.disabled=true);message('처리 중입니다…');try{await fn();if($('#message').textContent==='처리 중입니다…')message('');}catch(e){message(e.message);}finally{buttons.forEach(b=>b.disabled=false);}}
-function render(state){current=state;$('#login').hidden=true;$('#dashboard').hidden=false;$('#connection').textContent='Mac 연결됨';$('#time').textContent=state.observedAt?`최근 조회 ${date(state.observedAt/1000)} KST`:'최신 조회를 눌러 사용량을 확인하세요.';$('#notice').textContent=state.notice;$('#notifications').checked=state.notificationsEnabled;$('#push-status').textContent=state.subscriptionCount?`${state.subscriptionCount}개 기기 등록`:'등록 안 됨';
+function render(state){current=state;$('#login').hidden=true;$('#dashboard').hidden=false;$('#connection').textContent='서버 연결됨';$('#time').textContent=state.observedAt?`최근 조회 ${date(state.observedAt/1000)} KST`:'최신 조회를 눌러 사용량을 확인하세요.';$('#notice').textContent=state.notice;$('#notifications').checked=state.notificationsEnabled;$('#push-status').textContent=state.subscriptionCount?`${state.subscriptionCount}개 기기 등록`:'등록 안 됨';
  $('#metrics').replaceChildren();const values=[['등록 계정',state.accounts.length],['5시간 소진',state.accounts.filter(a=>a.quota.shortPercent>=100).length],['일시 중지',state.accounts.filter(a=>a.paused).length]];values.forEach(([label,v])=>{const e=text('div','','metric');e.append(text('span',label),text('b',v));$('#metrics').append(e);});$('#accounts').replaceChildren();
  for(const a of state.accounts){const card=text('article','','account'+(a.active?' active':''));const head=text('div','','head');head.append(text('h3',a.label),text('span',a.paused?'중지':a.active?'선택됨':'풀 계정','pill'));card.append(head,text('div',`${a.plan||'플랜 미확인'}${a.needsReauth?' · 재로그인 필요':''}`,'plan'));
   for(const [label,key,reset] of [['5시간','shortPercent','shortResetAt'],['주간','weeklyPercent','weeklyResetAt']]){const v=a.quota[key];const line=text('div','','usage-label');line.append(text('span',label),text('b',percentage(v)));const track=text('div','','track'),fill=text('div','','fill'+(v>=100?' spent':v>=80?' warn':''));fill.style.width=`${Math.max(0,Math.min(100,v||0))}%`;track.append(fill);card.append(line,track,text('div',`리셋 ${date(a.quota[reset])}`,'reset'));}
@@ -79,3 +79,20 @@ $("#copy-widget").onclick=async()=>{
 };
 
 $('#logout').onclick=()=>perform(async()=>{await api('logout',{});location.reload();});
+
+// Prepare credentials before the click so Chrome sees a direct user gesture.
+let androidWidgetKey=null;
+const androidButton=$('#android-connect');
+androidButton.disabled=true;
+async function prepareAndroidConnection(){
+ if(!current)return;
+ try{androidWidgetKey=(await api('widget-key')).key;androidButton.disabled=false;}catch{androidWidgetKey=null;}
+}
+androidButton.onclick=()=>{
+ if(!androidWidgetKey){$('#android-connect-status').textContent='로그인 후 다시 시도하세요.';return;}
+ const params=new URLSearchParams({url:location.origin,key:androidWidgetKey});
+ const link=`intent://connect?${params}#Intent;scheme=opencodexquota;package=me.opencodex.quota;end`;
+ $('#android-connect-status').textContent='앱에서 서버 주소를 확인하고 연결을 허용하세요. 앱이 없으면 먼저 QA 앱을 설치하세요.';
+ location.href=link;
+};
+setInterval(()=>{if(current&&!androidWidgetKey)prepareAndroidConnection();},2000);

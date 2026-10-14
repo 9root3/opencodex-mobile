@@ -9,9 +9,9 @@
 | 서버 컴퓨터 | 휴대폰 | 현재 가능한 범위 |
 |---|---|---|
 | Mac | iPhone | 자동 설치, 웹앱, 푸시, Scriptable 위젯. 개발 환경에서 확인했습니다. |
-| Mac | Android | Mac 자동 설치 후 같은 웹앱에 연결. 화면과 푸시는 실제 기기 확인이 필요합니다. Android 위젯은 아직 없습니다. |
+| Mac | Android | Mac 자동 설치 후 같은 웹앱에 연결. 화면과 푸시는 실제 기기 확인이 필요합니다. Android 위젯 QA 앱을 추가했습니다. |
 | Windows | iPhone | Windows 자동 설치·로그인 시 시작·프로세스 복구를 구현했습니다. Windows 실기기 검증은 필요합니다. iPhone은 같은 웹앱·Scriptable을 사용합니다. |
-| Windows | Android | Windows 자동 설치 후 같은 웹앱을 사용합니다. Windows·Android 실기기 검증과 Android 위젯은 남아 있습니다. |
+| Windows | Android | Windows 자동 설치 후 같은 웹앱을 사용합니다. Windows·Android 실기기 검증은 남아 있습니다. |
 
 이미 Mac 서버가 있다면 휴대폰 종류에 관계없이 **4단계**부터 진행할 수 있습니다. Windows도 아래와 동일한 설치 순서를 사용합니다.
 
@@ -100,7 +100,12 @@ npm run setup -- --url=https://YOUR-ASSIGNED-DOMAIN.ngrok-free.dev
 
 ### Android
 
-웹앱은 사용할 수 있지만 **이 프로젝트의 Android 홈 화면 위젯은 아직 제공하지 않습니다.** Scriptable 코드를 Android에 설치하는 단계는 없습니다. Android 위젯이 구현되면 같은 풀 잔량과 회복 일정을 제공할 예정입니다.
+1. [GitHub Actions](https://github.com/9root3/opencodex-mobile/actions/workflows/android.yml)의 성공한 빌드에서 QA APK를 다운로드·설치합니다. Artifacts 다운로드는 GitHub 로그인이 필요합니다.
+2. Chrome에서 본인의 웹앱에 로그인하고 **Android 위젯 연결**을 누릅니다.
+3. 앱에서 서버 주소를 확인하고 **연결**을 누릅니다. 주소·키는 직접 입력할 필요가 없습니다.
+4. 홈 화면 위젯 추가를 허용합니다. 추가 창이 없는 런처는 홈 화면을 길게 눌러 위젯 → OpenCodex quota를 선택합니다.
+
+Scriptable과 같은 디자인으로 표시합니다. 위젯 새로고침은 앱을 열지 않고 처리합니다. 자동 조회는 30분 간격으로 요청하지만 절전 정책에 따라 지연될 수 있습니다. QA 버전이며 실제 Android 기기 검증과 정식 서명·배포는 남아 있습니다. [상세 안내](../android/README.md).
 
 ## 연결이 안 될 때
 
