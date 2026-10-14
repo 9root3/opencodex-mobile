@@ -89,7 +89,7 @@ The widget shows pool-wide five-hour remaining quota, three upcoming recoveries,
 
 Install the QA APK from [the QA download](https://github.com/9root3/opencodex-mobile/releases/download/android-qa/opencodex-quota.apk), open your dashboard in Chrome and tap **Android 위젯 연결**. Confirm the server in the app and accept the home-screen widget prompt. The server URL and widget key are passed automatically; no manual entry is required. Manual entry remains available as a fallback.
 
-The widget reproduces the Scriptable design. Refresh works without opening the app. Background cache reads request a 30-minute interval but can be delayed by Android power management. Device verification and stable signed distribution remain pending. See [Android setup and QA](../android/README.md).
+The widget reproduces the Scriptable design. Refresh works without opening the app. Background cache reads request a 30-minute interval but can be delayed by Android power management. Device verification and production distribution remain pending. See [Android setup and QA](../android/README.md).
 
 ## Troubleshooting
 
@@ -105,4 +105,4 @@ The widget reproduces the Scriptable design. Refresh works without opening the a
 
 This is a roadmap, **not a working installation flow**: equivalent Mac/Windows installers, a short-lived single-use pairing QR at installation completion, confirmation on either phone, and device-specific home-screen, notification and widget guidance.
 
-This guide uses the same step sequence while stating actual support. Identical experiences across all four combinations still require QR pairing, an Android widget and device verification including Windows.
+This guide uses the same step sequence while stating actual support. Identical experiences across all four combinations still require QR pairing and device verification including the Android widget and Windows.

@@ -4,7 +4,7 @@ A small native companion to the existing web dashboard. It uses the read-only wi
 
 ## User setup
 
-1. Install the QA APK from the latest successful **Android widget QA build** in APK 다운로드 (Artifacts → `opencodex-quota-android-qa`). GitHub sign-in is required to download artifacts. Unzip and install the APK; allow installation from that source if Android asks.
+1. Install the [QA APK](https://github.com/9root3/opencodex-mobile/releases/download/android-qa/opencodex-quota.apk); allow installation from that source if Android asks.
 2. Open your existing web dashboard in Chrome and log in.
 3. Tap **Android 위젯 연결**. Confirm the displayed server address in the app.
 4. Accept the launcher's **Add widget** prompt. If unsupported, long-press the home screen and choose Widgets → OpenCodex quota.
