@@ -14,7 +14,7 @@ class ConnectActivity: Activity() {
         super.onCreate(savedInstanceState)
         val panel=LinearLayout(this).apply { orientation=LinearLayout.VERTICAL;setPadding(32,48,32,32) }
         val heading=TextView(this).apply{text="OpenCodex quota";textSize=24f};panel.addView(heading)
-        val hint=TextView(this).apply{text="웹앱에서 ‘Android 위젯 연결’을 누르면 자동으로 설정됩니다. 직접 연결할 수도 있습니다."};panel.addView(hint)
+        val instruction=TextView(this).apply{text="웹앱에서 ‘Android 위젯 연결’을 누르면 자동으로 설정됩니다. 직접 연결할 수도 있습니다."};panel.addView(instruction)
         val url=EditText(this).apply{hint="https://서버주소";inputType=android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI};panel.addView(url)
         val key=EditText(this).apply{hint="위젯 키";inputType=android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD};panel.addView(key)
         val status=TextView(this);panel.addView(status)
